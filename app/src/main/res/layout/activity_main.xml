@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#121212"
+    android:padding="20dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="KALACAM APP"
+            android:textStyle="bold"
+            android:textSize="22sp"
+            android:textColor="@android:color/white"
+            android:layout_marginBottom="16dp" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Nombre"
+            style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox.Dense">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etNombre"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@android:color/white"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Apellido"
+            style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox.Dense"
+            android:layout_marginTop="8dp">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etApellido"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@android:color/white"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Email"
+            style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox.Dense"
+            android:layout_marginTop="8dp">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etEmail"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@android:color/white"
+                android:inputType="textEmailAddress"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="240dp"
+            android:layout_marginTop="16dp">
+
+            <androidx.camera.view.PreviewView
+                android:id="@+id/previewView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="gone" />
+
+            <ImageView
+                android:id="@+id/ivThumbnail"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:contentDescription="Previsualización"
+                android:visibility="gone" />
+
+            <View
+                android:id="@+id/overlayGuia"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/borde_guia"
+                android:visibility="gone" />
+        </FrameLayout>
+
+        <Button
+            android:id="@+id/btnCambiarCamara"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Cambiar cámara"
+            android:textColor="@android:color/white"
+            android:backgroundTint="#393E46"
+            android:layout_marginTop="8dp"
+            android:visibility="gone" />
+
+        <Button
+            android:id="@+id/btnCapturar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Capturar"
+            android:backgroundTint="#0D7377"
+            android:textColor="@android:color/white"
+            android:layout_marginTop="8dp"
+            android:visibility="gone" />
+
+        <Button
+            android:id="@+id/btnTomarFoto"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Tomar foto (cámara frontal)"
+            android:textColor="@android:color/white"
+            android:backgroundTint="#0D7377"
+            android:layout_marginTop="12dp" />
+
+        <Button
+            android:id="@+id/btnGaleria"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Elegir imagen de la galería"
+            android:textColor="@android:color/white"
+            android:layout_marginTop="10dp"
+            android:backgroundTint="#3A86FF" />
+
+        <Button
+            android:id="@+id/btnEnviar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Enviar / Iniciar sesión"
+            android:textColor="@android:color/white"
+            android:backgroundTint="#32E0C4"
+            android:layout_marginTop="12dp" />
+
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_gravity="center"
+            android:visibility="gone"
+            android:indeterminate="true"
+            style="?android:attr/progressBarStyleLarge"
+            android:layout_marginTop="16dp" />
+
+        <TextView
+            android:id="@+id/tvStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/white"
+            android:layout_marginTop="12dp" />
+
+    </LinearLayout>
+</ScrollView>

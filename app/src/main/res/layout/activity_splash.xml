@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_tech">
+
+    <ImageView
+        android:id="@+id/logoImage"
+        android:layout_width="260dp"
+        android:layout_height="260dp"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:src="@drawable/kalacam_logo"
+        android:contentDescription="KALACAM APP Logo"
+        android:elevation="8dp"
+        android:translationZ="8dp"
+        android:scaleType="fitCenter"
+        android:layout_marginBottom="50dp"
+        android:animation="@anim/fade_in"/>
+
+    <TextView
+        android:id="@+id/tvBrand"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="KALACAM SECURITY"
+        android:textColor="@android:color/white"
+        android:textStyle="bold"
+        android:textSize="18sp"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/logoImage"
+        android:layout_marginTop="12dp"
+        android:animation="@anim/fade_in"/>
+</RelativeLayout>

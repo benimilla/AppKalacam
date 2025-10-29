@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:startColor="#000000"
+                android:centerColor="#0A0F18"
+                android:endColor="#000000"
+                android:angle="45"/>
+        </shape>
+    </item>
+
+    <!-- Líneas tecnológicas suaves -->
+    <item android:drawable="@android:drawable/screen_background_dark_transparent" />
+</layer-list>
