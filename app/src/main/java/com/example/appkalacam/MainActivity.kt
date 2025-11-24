@@ -4,9 +4,11 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Matrix
 import android.os.Bundle
 import android.view.View
 import android.widget.*
+import androidx.exifinterface.media.ExifInterface
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -226,6 +228,52 @@ class MainActivity : AppCompatActivity() {
 
     // --- LÓGICA DE VALIDACIÓN (WebSocket) ---
 
+    private fun corregirOrientacionImagen(file: File): Bitmap {
+        /**
+         * Corrige la orientación de la imagen basándose en los datos EXIF.
+         * También maneja el espejo de la cámara frontal.
+         */
+        var bitmap = BitmapFactory.decodeFile(file.absolutePath)
+        
+        try {
+            val exif = ExifInterface(file.absolutePath)
+            val orientation = exif.getAttributeInt(
+                ExifInterface.TAG_ORIENTATION,
+                ExifInterface.ORIENTATION_NORMAL
+            )
+            
+            val matrix = Matrix()
+            
+            // Aplicar rotación según EXIF
+            when (orientation) {
+                ExifInterface.ORIENTATION_ROTATE_90 -> matrix.postRotate(90f)
+                ExifInterface.ORIENTATION_ROTATE_180 -> matrix.postRotate(180f)
+                ExifInterface.ORIENTATION_ROTATE_270 -> matrix.postRotate(270f)
+                ExifInterface.ORIENTATION_FLIP_HORIZONTAL -> matrix.preScale(-1f, 1f)
+                ExifInterface.ORIENTATION_FLIP_VERTICAL -> matrix.preScale(1f, -1f)
+            }
+            
+            // Para cámara frontal, NO aplicar espejo
+            // (La imagen ya viene correcta de ImageCapture)
+            
+            // Aplicar transformación si es necesaria
+            if (!matrix.isIdentity) {
+                val rotatedBitmap = Bitmap.createBitmap(
+                    bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true
+                )
+                if (rotatedBitmap != bitmap) {
+                    bitmap.recycle()
+                    bitmap = rotatedBitmap
+                }
+            }
+        } catch (e: Exception) {
+            // Si hay error leyendo EXIF, usar imagen original
+            android.util.Log.e("MainActivity", "Error leyendo EXIF: ${e.message}")
+        }
+        
+        return bitmap
+    }
+
     private fun validarRostroConWebSocket(file: File) {
         val client = OkHttpClient.Builder().build()
         val request = Request.Builder()
@@ -236,13 +284,27 @@ class MainActivity : AppCompatActivity() {
             override fun onOpen(webSocket: WebSocket, response: Response) {
                 lifecycleScope.launch(Dispatchers.IO) {
                     try {
-                        val bmp = BitmapFactory.decodeFile(file.absolutePath)
-                        val scaled = Bitmap.createScaledBitmap(bmp, 640, 480, true)
+                        // Corregir orientación de la imagen
+                        var bmp = corregirOrientacionImagen(file)
+                        
+                        // Redimensionar a 640x480
+                        val targetWidth = 640
+                        val targetHeight = 480
+                        val scaled = Bitmap.createScaledBitmap(bmp, targetWidth, targetHeight, true)
+                        
+                        // Comprimir a JPEG
                         val stream = java.io.ByteArrayOutputStream()
-                        scaled.compress(Bitmap.CompressFormat.JPEG, 90, stream)
+                        scaled.compress(Bitmap.CompressFormat.JPEG, 85, stream)
                         val bytes = stream.toByteArray()
                         val base64 = android.util.Base64.encodeToString(bytes, android.util.Base64.NO_WRAP)
-                        webSocket.send(base64)
+                        
+                        // Liberar recursos
+                        if (bmp != scaled) bmp.recycle()
+                        scaled.recycle()
+                        
+                        // Enviar en formato JSON que espera el backend
+                        val jsonPayload = """{"tipo": "imagen", "imagen": "$base64", "content_type": "image/jpeg"}"""
+                        webSocket.send(jsonPayload)
                     } catch (e: Exception) {
                         onErrorValidation("Error de procesamiento de imagen: ${e.message}")
                         webSocket.close(1000, "Error de procesamiento local")
@@ -251,10 +313,31 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun onMessage(webSocket: WebSocket, text: String) {
-                val isValid = text.contains("VALIDO", ignoreCase = true)
-                val statusMsg = if (isValid) "Rostro válido ✔" else "Rostro no válido ❌"
-                onValidationResult(isValid, statusMsg)
-                webSocket.close(1000, null) // Cerrar WebSocket inmediatamente después de recibir el mensaje
+                lifecycleScope.launch(Dispatchers.Main) {
+                    try {
+                        val json = org.json.JSONObject(text)
+                        
+                        // Ignorar mensajes de keepalive y conexión
+                        val tipo = json.optString("tipo", "")
+                        if (tipo == "keepalive" || tipo == "conexion") {
+                            return@launch
+                        }
+                        
+                        // Leer la respuesta de validación
+                        val ok = json.optBoolean("ok", false)
+                        val rostroDetectado = json.optBoolean("rostro_detectado", false)
+                        val mensaje = json.optString("mensaje", "Sin mensaje")
+                        
+                        val isValid = ok && rostroDetectado
+                        val statusMsg = if (isValid) "Rostro válido ✔" else "Rostro no válido ❌: $mensaje"
+                        
+                        onValidationResult(isValid, statusMsg)
+                        webSocket.close(1000, null)
+                    } catch (e: Exception) {
+                        onErrorValidation("Error al parsear respuesta: ${e.message}")
+                        webSocket.close(1000, "Error de parseo")
+                    }
+                }
             }
 
             override fun onClosing(webSocket: WebSocket, code: Int, reason: String) { webSocket.close(1000, null) }
